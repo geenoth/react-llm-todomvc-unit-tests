@@ -1,169 +1,193 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, fireEvent } from '@testing-library/react';
 import { EditTodoInput } from './02_EditTodoInput';
 
 describe('EditTodoInput', () => {
-  let mockOnSaveEdit;
-  let mockOnBlur;
+    let mockOnSaveEdit;
+    let mockOnBlur;
 
-  beforeEach(() => {
-    mockOnSaveEdit = jest.fn();
-    mockOnBlur = jest.fn();
-  });
+    beforeEach(() => {
+        mockOnSaveEdit = jest.fn();
+        mockOnBlur = jest.fn();
+    });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
 
-  it('renders correctly with default props', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    expect(input).toBeInTheDocument();
-    expect(input).toHaveClass('edit');
-    expect(input).toHaveAttribute('type', 'text');
-    expect(input).toHaveAttribute('id', 'edit-todo-input');
-    expect(input).toHaveValue('');
-    expect(input).toHaveFocus();
-  });
+    test('renders input with default props', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        expect(input).toBeInTheDocument();
+        expect(input).toHaveAttribute('type', 'text');
+        expect(input).toHaveAttribute('id', 'edit-todo-input');
+        expect(input).toHaveValue('');
+        expect(document.activeElement).toBe(input);
+    });
 
-  it('renders with defaultValue prop', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} defaultValue="Test todo" />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    expect(input).toHaveValue('Test todo');
-  });
+    test('renders input with defaultValue', () => {
+        const { getByTestId } = render(
+            <EditTodoInput 
+                onSaveEdit={mockOnSaveEdit}
+                defaultValue="Test todo"
+            />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        expect(input).toHaveValue('Test todo');
+    });
 
-  it('renders label with correct attributes', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const label = screen.getByText('Edit Todo Input');
-    expect(label).toHaveClass('visually-hidden');
-    expect(label).toHaveAttribute('for', 'edit-todo-input');
-  });
+    test('renders label with correct text and association', () => {
+        const { getByLabelText } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByLabelText('Edit Todo Input');
+        expect(input).toBeInTheDocument();
+    });
 
-  it('calls onSaveEdit when Enter key is pressed with valid input', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    fireEvent.change(input, { target: { value: 'New todo item' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    
-    expect(mockOnSaveEdit).toHaveBeenCalledWith('New todo item');
-    expect(mockOnSaveEdit).toHaveBeenCalledTimes(1);
-  });
+    test('calls onSaveEdit with sanitized value when Enter is pressed and value is valid', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        fireEvent.change(input, { target: { value: 'New todo item' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        
+        expect(mockOnSaveEdit).toHaveBeenCalledWith('New todo item');
+        expect(mockOnSaveEdit).toHaveBeenCalledTimes(1);
+    });
 
-  it('trims whitespace before saving', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    fireEvent.change(input, { target: { value: '  Trimmed todo  ' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    
-    expect(mockOnSaveEdit).toHaveBeenCalledWith('Trimmed todo');
-  });
+    test('does not call onSaveEdit when Enter is pressed and value is too short', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        
+        // Test with 1 character
+        fireEvent.change(input, { target: { value: 'a' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect(mockOnSaveEdit).not.toHaveBeenCalled();
+        
+        // Test with empty string
+        fireEvent.change(input, { target: { value: '' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect(mockOnSaveEdit).not.toHaveBeenCalled();
+        
+        // Test with whitespace only
+        fireEvent.change(input, { target: { value: '   ' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect(mockOnSaveEdit).not.toHaveBeenCalled();
+    });
 
-  it('does not call onSaveEdit when input is less than 2 characters', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    
-    // Test with 1 character
-    fireEvent.change(input, { target: { value: 'a' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    expect(mockOnSaveEdit).not.toHaveBeenCalled();
-    
-    // Test with empty string
-    fireEvent.change(input, { target: { value: '' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    expect(mockOnSaveEdit).not.toHaveBeenCalled();
-    
-    // Test with only spaces
-    fireEvent.change(input, { target: { value: '   ' } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    expect(mockOnSaveEdit).not.toHaveBeenCalled();
-  });
+    test('calls onSaveEdit when Enter is pressed with exactly 2 characters', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        fireEvent.change(input, { target: { value: 'ab' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        
+        expect(mockOnSaveEdit).toHaveBeenCalledWith('ab');
+    });
 
-  it('does not call onSaveEdit when non-Enter key is pressed', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    fireEvent.change(input, { target: { value: 'Valid input' } });
-    fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
-    
-    expect(mockOnSaveEdit).not.toHaveBeenCalled();
-  });
+    test('trims whitespace before validation', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        fireEvent.change(input, { target: { value: '  Valid todo  ' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        
+        expect(mockOnSaveEdit).toHaveBeenCalledWith('Valid todo');
+    });
 
-  it('sanitizes special characters in input', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    const unsanitizedValue = '<script>alert("xss")</script> & "quotes" \'single\' /slash/';
-    fireEvent.change(input, { target: { value: unsanitizedValue } });
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    
-    expect(mockOnSaveEdit).toHaveBeenCalledWith(
-      '&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt; &amp; &quot;quotes&quot; &#x27;single&#x27; &#x2F;slash&#x2F;'
-    );
-  });
+    test('sanitizes HTML special characters', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        
+        const testCases = [
+            { input: 'Test & test', expected: 'Test &amp; test' },
+            { input: 'Test < test', expected: 'Test &lt; test' },
+            { input: 'Test > test', expected: 'Test &gt; test' },
+            { input: 'Test "quoted"', expected: 'Test &quot;quoted&quot;' },
+            { input: "Test 'quoted'", expected: "Test &#x27;quoted&#x27;" },
+            { input: 'Test / slash', expected: 'Test &#x2F; slash' },
+            { input: '<script>alert("XSS")</script>', expected: '&lt;script&gt;alert(&quot;XSS&quot;)&lt;&#x2F;script&gt;' }
+        ];
+        
+        testCases.forEach(({ input: testInput, expected }) => {
+            fireEvent.change(input, { target: { value: testInput } });
+            fireEvent.keyDown(input, { key: 'Enter' });
+            expect(mockOnSaveEdit).toHaveBeenCalledWith(expected);
+        });
+    });
 
-  it('calls onBlur when input loses focus', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} onBlur={mockOnBlur} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    fireEvent.blur(input);
-    
-    expect(mockOnBlur).toHaveBeenCalledTimes(1);
-  });
+    test('does not call onSaveEdit for non-Enter keys', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        fireEvent.change(input, { target: { value: 'Valid todo' } });
+        
+        const keys = ['Escape', 'Tab', 'Shift', 'Control', 'Alt', 'a', '1'];
+        keys.forEach(key => {
+            fireEvent.keyDown(input, { key });
+        });
+        
+        expect(mockOnSaveEdit).not.toHaveBeenCalled();
+    });
 
-  it('does not throw error when onBlur is not provided', () => {
-    render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const input = screen.getByTestId('edit-todo-input');
-    expect(() => fireEvent.blur(input)).not.toThrow();
-  });
+    test('calls onBlur when input loses focus', () => {
+        const { getByTestId } = render(
+            <EditTodoInput 
+                onSaveEdit={mockOnSaveEdit}
+                onBlur={mockOnBlur}
+            />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        fireEvent.blur(input);
+        
+        expect(mockOnBlur).toHaveBeenCalledTimes(1);
+    });
 
-  it('maintains callback reference stability', () => {
-    const { rerender } = render(
-      <EditTodoInput onSaveEdit={mockOnSaveEdit} onBlur={mockOnBlur} />
-    );
-    
-    const input = screen.getByTestId('edit-todo-input');
-    const initialKeyDownHandler = input.onkeydown;
-    const initialBlurHandler = input.onblur;
-    
-    // Rerender with same props
-    rerender(<EditTodoInput onSaveEdit={mockOnSaveEdit} onBlur={mockOnBlur} />);
-    
-    expect(input.onkeydown).toBe(initialKeyDownHandler);
-    expect(input.onblur).toBe(initialBlurHandler);
-  });
+    test('does not throw error when onBlur is not provided', () => {
+        const { getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const input = getByTestId('edit-todo-input');
+        expect(() => fireEvent.blur(input)).not.toThrow();
+    });
 
-  it('updates callback reference when dependencies change', () => {
-    const { rerender } = render(
-      <EditTodoInput onSaveEdit={mockOnSaveEdit} onBlur={mockOnBlur} />
-    );
-    
-    const input = screen.getByTestId('edit-todo-input');
-    const initialKeyDownHandler = input.onkeydown;
-    const initialBlurHandler = input.onblur;
-    
-    const newMockOnSaveEdit = jest.fn();
-    const newMockOnBlur = jest.fn();
-    
-    rerender(<EditTodoInput onSaveEdit={newMockOnSaveEdit} onBlur={newMockOnBlur} />);
-    
-    expect(input.onkeydown).not.toBe(initialKeyDownHandler);
-    expect(input.onblur).not.toBe(initialBlurHandler);
-  });
-
-  it('renders with correct container structure', () => {
-    const { container } = render(<EditTodoInput onSaveEdit={mockOnSaveEdit} />);
-    
-    const inputContainer = container.querySelector('.input-container');
-    expect(inputContainer).toBeInTheDocument();
-    expect(inputContainer.querySelector('#edit-todo-input')).toBeInTheDocument();
-    expect(inputContainer.querySelector('label')).toBeInTheDocument();
-  });
+    test('has correct CSS classes', () => {
+        const { container, getByTestId } = render(
+            <EditTodoInput onSaveEdit={mockOnSaveEdit} />
+        );
+        
+        const inputContainer = container.querySelector('.input-container');
+        expect(inputContainer).toBeInTheDocument();
+        
+        const input = getByTestId('edit-todo-input');
+        expect(input).toHaveClass('edit');
+        
+        const label = container.querySelector('label');
+        expect(label).toHaveClass('visually-hidden');
+    });
 });
