@@ -1,22 +1,18 @@
+import { useCallback } from "react";
 
-import classnames from "classnames";
-
-export function FilterLink_All({ isActive = false, onFilterChange }) {
-    const handleClick = (e) => {
-        e.preventDefault();
-        onFilterChange("all");
-    };
+export function TodoItemCheckbox({ completed = false, onToggle, todoId }) {
+    const handleChange = useCallback(() => {
+        onToggle(todoId);
+    }, [onToggle, todoId]);
 
     return (
-        <li>
-            <a
-                className={classnames({ selected: isActive })}
-                href="#/"
-                data-testid="filter-link-all"
-                onClick={handleClick}
-            >
-                All
-            </a>
-        </li>
+        <input
+            className="toggle"
+            type="checkbox"
+            data-testid="todo-item-checkbox"
+            checked={completed}
+            onChange={handleChange}
+            aria-label={`Mark todo ${todoId} as ${completed ? "incomplete" : "complete"}`}
+        />
     );
 }
