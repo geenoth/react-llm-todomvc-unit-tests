@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterLink_All snapshot tests matches snapshot when active 1`] = `
+<div>
+  <li>
+    <a
+      class="selected"
+      data-testid="filter-link-all"
+      href="#/"
+    >
+      All
+    </a>
+  </li>
+</div>
+`;
+
+exports[`FilterLink_All snapshot tests matches snapshot when inactive 1`] = `
+<div>
+  <li>
+    <a
+      class=""
+      data-testid="filter-link-all"
+      href="#/"
+    >
+      All
+    </a>
+  </li>
+</div>
+`;
