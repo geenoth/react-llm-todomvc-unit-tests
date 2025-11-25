@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ClearCompletedButton renders correctly with all props 1`] = `
+<button
+  class="clear-completed"
+  data-testid="clear-completed-button"
+  disabled=""
+>
+  Clear completed
+</button>
+`;

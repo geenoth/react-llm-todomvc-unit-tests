@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ClearCompletedButton matches snapshot when disabled 1`] = `
+<DocumentFragment>
+  <button
+    class="clear-completed"
+    data-testid="clear-completed-button"
+    disabled=""
+  >
+    Clear completed
+  </button>
+</DocumentFragment>
+`;
+
+exports[`ClearCompletedButton matches snapshot when enabled 1`] = `
+<DocumentFragment>
+  <button
+    class="clear-completed"
+    data-testid="clear-completed-button"
+  >
+    Clear completed
+  </button>
+</DocumentFragment>
+`;
