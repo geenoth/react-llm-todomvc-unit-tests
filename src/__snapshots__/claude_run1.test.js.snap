@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RemainingCounter snapshot tests should match snapshot with count 0 1`] = `
+<span
+  class="todo-count"
+  data-testid="remaining-counter"
+>
+  0 items left!
+</span>
+`;
+
+exports[`RemainingCounter snapshot tests should match snapshot with count 1 1`] = `
+<span
+  class="todo-count"
+  data-testid="remaining-counter"
+>
+  1 item left!
+</span>
+`;
+
+exports[`RemainingCounter snapshot tests should match snapshot with count greater than 1 1`] = `
+<span
+  class="todo-count"
+  data-testid="remaining-counter"
+>
+  5 items left!
+</span>
+`;

@@ -1,0 +1,16 @@
+TN:
+SF:src\12_RemainingCounter.jsx
+FN:1,RemainingCounter
+FNF:1
+FNH:1
+FNDA:25,RemainingCounter
+DA:2,25
+DA:4,25
+LF:2
+LH:2
+BRDA:1,0,0,1
+BRDA:2,1,0,7
+BRDA:2,1,1,18
+BRF:3
+BRH:3
+end_of_record
